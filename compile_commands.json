@@ -1,0 +1,21 @@
+[
+ {
+  "directory": "/home/rgramati/Documents/ft_nm/celf",
+  "arguments": [
+   "clang",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-MMD",
+   "-MP",
+   "-g3",
+   "-fPIC",
+   "-o",
+   "build/src/u_printf.o",
+   "-c",
+   "src/u_printf.c",
+   "-Iinclude"
+  ],
+  "file": "src/u_printf.c"
+ }
+]
