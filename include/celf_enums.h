@@ -30,9 +30,9 @@
  *	integer types for all fields.
  *
  *	Defining CELF_ENUMS_STRINGIFY above the <celf.h> include will
- *	generate stringify functions for all enums, thus any call like :
+ *	generate u_stringify functions for all enums, thus any call like :
  *
- *		ENUM_stringify(value);
+ *		ENUM_u_stringify(value);
  *
  *	with ENUM being one of the defined enums in this file, will return a
  *	pointer to a NULL-terminated string containing, if found, the string
@@ -310,7 +310,7 @@ enum	ELF_DynamicTag
 
 #  define	ENUM_TYPE	ELF_IdentIndices
 #  define	ENUM_LIST	ELF_IdentIndicesList
-#  include	<stringify.h>
+#  include	<u_stringify.h>
 
 /**
  * @enum	ELF_Class
@@ -321,7 +321,7 @@ enum	ELF_DynamicTag
 
 #  define	ENUM_TYPE	ELF_Class
 #  define	ENUM_LIST	ELF_ClassList
-#  include	<stringify.h>
+#  include	<u_stringify.h>
 
 /**
  * @enum	ELF_Endianness
@@ -333,7 +333,7 @@ enum	ELF_DynamicTag
 
 #  define	ENUM_TYPE	ELF_Endianness
 #  define	ENUM_LIST	ELF_EndiannessList
-#  include	<stringify.h>
+#  include	<u_stringify.h>
 
 /**
  * @enum	ELF_OsAbi
@@ -360,7 +360,7 @@ enum	ELF_DynamicTag
 
 #  define	ENUM_TYPE	ELF_OsAbi
 #  define	ENUM_LIST	ELF_OsAbiList
-#  include	<stringify.h>
+#  include	<u_stringify.h>
 
 /**
  * @enum	ELF_ExType
@@ -383,7 +383,7 @@ enum	ELF_DynamicTag
 #  define	ENUM_TYPE	ELF_ExType
 #  define	ENUM_LIST	ELF_ExTypeList
 #  define	ENUM_SPEC	ELF_ExTypeSpec
-#  include	<stringify.h>
+#  include	<u_stringify.h>
 
 /**
  * @enum	ELF_Machine
@@ -405,7 +405,7 @@ enum	ELF_DynamicTag
 
 #  define	ENUM_TYPE	ELF_Machine
 #  define	ENUM_LIST	ELF_MachineList
-#  include	<stringify.h>
+#  include	<u_stringify.h>
 
 /**
  * @enum	ELF_Version
@@ -417,7 +417,7 @@ enum	ELF_DynamicTag
 
 #  define	ENUM_TYPE	ELF_Version
 #  define	ENUM_LIST	ELF_VersionList
-#  include	<stringify.h>
+#  include	<u_stringify.h>
 
 /**
  * @enum	ELF_ProgType
@@ -450,7 +450,7 @@ enum	ELF_DynamicTag
 #  define	ENUM_TYPE	ELF_ProgType
 #  define	ENUM_LIST	ELF_ProgTypeList
 #  define	ENUM_SPEC	ELF_ProgTypeSpec
-#  include	<stringify.h>
+#  include	<u_stringify.h>
 
 /**
  * @enum	ELF_ProgFlags
@@ -464,7 +464,7 @@ enum	ELF_DynamicTag
 
 #  define	ENUM_TYPE	ELF_ProgFlags
 #  define	ENUM_LIST	ELF_ProgFlagsList
-#  include	<stringify.h>
+#  include	<u_stringify.h>
 
 /**
  * @enum	ELF_SectionType
@@ -504,7 +504,7 @@ enum	ELF_DynamicTag
 #  define	ENUM_TYPE	ELF_SectionType
 #  define	ENUM_LIST	ELF_SectionTypeList
 #  define	ENUM_SPEC	ELF_SectionTypeSpec
-#  include	<stringify.h>
+#  include	<u_stringify.h>
 
 /**
  * @enum	ELF_SectionFlags
@@ -527,7 +527,7 @@ enum	ELF_DynamicTag
 
 #  define	ENUM_TYPE	ELF_SectionFlags
 #  define	ENUM_LIST	ELF_SectionFlagsList
-#  include	<stringify.h>
+#  include	<u_stringify.h>
 
 /**
  * @enum	ELF_SymbolVisibility
@@ -540,7 +540,7 @@ enum	ELF_DynamicTag
 
 #  define	ENUM_TYPE	ELF_SymbolVisibility
 #  define	ENUM_LIST	ELF_SymbolVisibilityList
-#  include	<stringify.h>
+#  include	<u_stringify.h>
 
 /**
  * @enum	ELF_SymbolBind
@@ -558,7 +558,7 @@ enum	ELF_DynamicTag
 
 #  define	ENUM_TYPE	ELF_SymbolBind
 #  define	ENUM_LIST	ELF_SymbolBindList
-#  include	<stringify.h>
+#  include	<u_stringify.h>
 
 /**
  * @enum	ELF_SymbolType
@@ -580,7 +580,7 @@ enum	ELF_DynamicTag
 
 #  define	ENUM_TYPE	ELF_SymbolType
 #  define	ENUM_LIST	ELF_SymbolTypeList
-#  include	<stringify.h>
+#  include	<u_stringify.h>
 
 /**
  * @enum	ELF_SectionIndices
@@ -598,7 +598,7 @@ enum	ELF_DynamicTag
 
 #  define	ENUM_TYPE	ELF_SectionIndices
 #  define	ENUM_LIST	ELF_SectionIndicesList
-#  include	<stringify.h>
+#  include	<u_stringify.h>
 
 /**
  * @enum	ELF_DynamicTag
@@ -653,7 +653,7 @@ enum	ELF_DynamicTag
 #  define ENUM_TYPE		ELF_DynamicTag
 #  define ENUM_LIST		ELF_DynamicTagList
 #  define ENUM_SPEC		ELF_DynamicTagSpec
-#  include	<stringify.h>
+#  include	<u_stringify.h>
 
 # endif	// CELF_ENUMS_STRINGIFY
 

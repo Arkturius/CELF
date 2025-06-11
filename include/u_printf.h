@@ -42,4 +42,15 @@ int	u_vprintf(const char *fmt, va_list ap);
  */
 int	u_vdprintf(int fd, const char *fmt, va_list ap);
 
+
+/**
+ * libc clones.
+ */
+
+uint32_t	u_strlen(const char *src);
+
+char		*u_strcat(char *dst, const char *src);
+
+void		*u_memset(void *dst, int c, uint32_t n);
+
 #endif

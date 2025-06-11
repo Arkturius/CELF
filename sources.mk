@@ -4,4 +4,4 @@
 # 	CELF source files definition.
 #
 
-SRCS	:=	u_printf.c
+SRCS	:=	celf.c strtab.c u_printf.c

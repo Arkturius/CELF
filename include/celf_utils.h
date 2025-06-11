@@ -5,43 +5,31 @@
 #ifndef _CELF_UTILS_H
 # define _CELF_UTILS_H
 
+__attribute__((noreturn)) static inline void exit(int code)
+{
+    __asm__ volatile
+	(
+        ".intel_syntax noprefix\n\t"
+        "syscall\n\t"
+        ".att_syntax prefix"
+        :
+        : "a" (60), "D" (code)
+        :
+    );
+    __builtin_unreachable();
+}
+
 # include <unistd.h>
 # include <stdint.h>
 # include <fcntl.h>
 # include <sys/stat.h>
 # include <sys/mman.h>
 
-/**
- *	@struct		ELF.
- *
- *	@brief			ELF file handle.
- *
- *		filename
- *		raw			raw bytes pointer to where the file is mapped
- *		size		size of the file in bytes
- */
-typedef struct	_elf_s ELF;
-struct			_elf_s
-{
-	char		*filename;
-	uint8_t		*raw;
-	uint32_t	size;
-};
+# include <u_printf.h>
 
-/**
- *	@struct		CELF.
- *
- *	@brief			CELF context.
- *
- *		file		Current file handle.
- */
-typedef struct	_celf_ctx_s	CELF;
-struct			_celf_ctx_s
-{
-	ELF		file;
-};
-
-CELF	_celf_ctx = {0};
+typedef struct	_elf_s			ELF;
+typedef struct	_celf_ctx_s		CELF;
+typedef struct	_celf_strtab_s	STRTAB;
 
 /* UTILS MACROS ------------------------------------------------------------- */
 
@@ -50,6 +38,8 @@ CELF	_celf_ctx = {0};
 # define	ELF_RAW			CELF_FILE.raw
 # define	ELF_SIZE		CELF_FILE.size
 # define	ELF_FILENAME	CELF_FILE.filename
+
+# define	CELF_STRTAB		CELF_CTX.strtab
 
 # define	HOST_IS_LE 0
 # if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
@@ -83,6 +73,31 @@ CELF	_celf_ctx = {0};
 #  define	CONCAT_INNER(a, b)	a##b
 #  define	CONCAT(a, b)		CONCAT_INNER(a, b)
 # endif
+
+# define	CELF_FUNC(name)				CONCAT(celf_, name)
+# define	CELF_API(type, name, ...)	type CELF_FUNC(name)(__VA_ARGS__)
+
+/* ERROR HANDLING ----------------------------------------------------------- */
+
+# define	_celf_fail_open	"open() call failed."
+# define	_celf_fail_stat	"stat() call failed."
+# define	_celf_fail_mmap	"mmap() call failed."
+
+#define		CELF_ERROR(msg)													\
+{																			\
+	u_dprintf																\
+	(																		\
+		STDERR_FILENO,														\
+		"CELF: error at %s:%d in %s\n > %s",								\
+		__FILE__, __LINE__, __func__, msg									\
+	);																		\
+}																			\
+
+# define	CELF_THROW(msg)	do												\
+{																			\
+	CELF_ERROR(msg)															\
+	exit(1);																\
+} while (0)
 
 /* BYTESWAP SUPPORT --------------------------------------------------------- */
 

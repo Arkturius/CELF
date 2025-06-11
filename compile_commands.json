@@ -17,5 +17,65 @@
    "-Iinclude"
   ],
   "file": "src/u_printf.c"
+ },
+ {
+  "directory": "/home/rgramati/Documents/celf",
+  "arguments": [
+   "clang",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-MMD",
+   "-MP",
+   "-O0",
+   "-g3",
+   "-fPIC",
+   "-o",
+   "build/src/celf.o",
+   "-c",
+   "src/celf.c",
+   "-Iinclude"
+  ],
+  "file": "src/celf.c"
+ },
+ {
+  "directory": "/home/rgramati/Documents/celf",
+  "arguments": [
+   "clang",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-MMD",
+   "-MP",
+   "-O0",
+   "-g3",
+   "-fPIC",
+   "-o",
+   "build/src/u_printf.o",
+   "-c",
+   "src/u_printf.c",
+   "-Iinclude"
+  ],
+  "file": "src/u_printf.c"
+ },
+ {
+  "directory": "/home/rgramati/Documents/celf",
+  "arguments": [
+   "clang",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-MMD",
+   "-MP",
+   "-O0",
+   "-g3",
+   "-fPIC",
+   "-o",
+   "build/src/strtab.o",
+   "-c",
+   "src/strtab.c",
+   "-Iinclude"
+  ],
+  "file": "src/strtab.c"
  }
 ]

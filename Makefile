@@ -12,7 +12,7 @@ OBJS		:=	$(addprefix $(OBJ_DIR)/, $(SRCS:%.c=%.o))
 
 CC			:=	clang
 
-CFLAGS		:=	-Wall -Wextra -Werror -MMD -MP
+CFLAGS		:=	-Wall -Wextra -Werror -MMD -MP -O0
 IFLAGS_DIRS	:=	$(INC_DIR)
 IFLAGS		+=	$(foreach dir, $(IFLAGS_DIRS), -I$(dir))
 
@@ -49,7 +49,7 @@ $(LIBNAME):			$(OBJS)
 
 $(OBJ_DIR)/%.o:		%.c
 	@$(MKDIR) $(@D)
-	@echo " $(CYAN)$(BOLD)$(ITALIC)■$(RESET)  compiling	$(GRAY)$(BOLD)$(ITALIC)$(notdir $@) from $(GRAY)$(BOLD)$(ITALIC)$(notdir $^)$(RESET)"
+	@echo " $(CYAN)$(BOLD)$(ITALIC)■$(RESET)  compiling	$(GRAY)$(BOLD)$(ITALIC)$(notdir $@)$(RESET) from $(GRAY)$(BOLD)$(ITALIC)$(notdir $^)$(RESET)"
 	@$(CC) $(CFLAGS) -fPIC -o $@ -c $< $(IFLAGS)
 
 clean:
@@ -63,14 +63,13 @@ fclean:		clean
 		echo " $(RED)$(BOLD)$(ITALIC)■$(RESET)  deleted	$(RED)$(BOLD)$(ITALIC)$(LIBNAME)$(RESET)"; \
 		$(RM) $(LIBNAME); \
 	fi
-	@$(RM) example
-	@$(RM) example.d
+	@$(RM) *.d
 
-EXAMPLE		?=	
+EXAMPLE		?=
 
 example:	$(EXAMPLE) $(LIBNAME)
 	@if [ "$(EXAMPLE)" != "" ]; then \
-		$(CC) $(CFLAGS) $(IFLAGS) $^ -o $@; \
+		$(CC) $(CFLAGS) $(IFLAGS) $^ -o $(EXAMPLE).out; \
 	fi
 
 re:			fclean all

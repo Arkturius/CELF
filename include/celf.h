@@ -1,10 +1,5 @@
 /**
  *	celf.h | ELF helper library.
- *
- *	Defining CELF_IMPLEMENTATION before including this header provides access
- *	to a whole collection of functions and a global context for ELF parsing.
- *
- *	See #ifdef CELF_IMPLEMENTATION	for more informations.
  * -------------------------------------------------------------------------- */
 
 #ifndef _CELF_H
@@ -395,11 +390,21 @@ typedef struct
 
 /* -------------------------------------------------------------------------- */
 
-# if defined(CELF_IMPLEMENTATION)
+extern	CELF _celf_ctx;
 
-#  define CELF_ENUMS_STRINGIFY
-#  include <celf_enums.h>
+# define CELF_ENUMS_STRINGIFY
+# include <celf_enums.h>
 
-# endif	//	CELF_IMPLEMENTATION
+# include <celf_context.h>
+
+CELF_API(void, ELF_open, const char *filename);
+CELF_API(DESTRUCTOR void, ELF_close);
+
+# if defined(CELF_STRIP_PREFIXES)
+
+#  define	ELF_open	celf_ELF_open
+#  define	ELF_close	celf_ELF_close
+
+# endif
 
 #endif	// _CELF_H
