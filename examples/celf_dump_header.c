@@ -26,6 +26,20 @@ int main(UNUSED int argc, UNUSED char **argv)
 	CELF_STRTAB = strtab_new(strtab_sizing(1));
 	ELF_open(filename);
 
+	strtab_alloc(CELF_STRTAB, "salut");
+	strtab_alloc(CELF_STRTAB, "coucou");
+	strtab_alloc(CELF_STRTAB, "jfzijf");
+	strtab_alloc(CELF_STRTAB, "69 lul");
+
+	const char	**arr = strtab_array(CELF_STRTAB);
+
+	for (uint32_t i = 0;; ++i)
+	{
+		if (!arr[i])
+			break ;
+		u_printf("string = [%s]\n", arr[i]);
+	}
+
 	/* TODO : Header parsing part ! */
 
  	ELF_close();

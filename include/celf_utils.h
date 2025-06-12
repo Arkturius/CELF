@@ -5,22 +5,9 @@
 #ifndef _CELF_UTILS_H
 # define _CELF_UTILS_H
 
-__attribute__((noreturn)) static inline void exit(int code)
-{
-    __asm__ volatile
-	(
-        ".intel_syntax noprefix\n\t"
-        "syscall\n\t"
-        ".att_syntax prefix"
-        :
-        : "a" (60), "D" (code)
-        :
-    );
-    __builtin_unreachable();
-}
-
 # include <unistd.h>
 # include <stdint.h>
+# include <stdlib.h>
 # include <fcntl.h>
 # include <sys/stat.h>
 # include <sys/mman.h>
