@@ -24,24 +24,26 @@ int main(UNUSED int argc, UNUSED char **argv)
 	u_printf("ELF header dump:\n");
 
 	CELF_STRTAB = strtab_new(strtab_sizing(1));
+	
 	ELF_open(filename);
-
-	strtab_alloc(CELF_STRTAB, "salut");
-	strtab_alloc(CELF_STRTAB, "coucou");
-	strtab_alloc(CELF_STRTAB, "jfzijf");
-	strtab_alloc(CELF_STRTAB, "69 lul");
-
-	const char	**arr = strtab_array(CELF_STRTAB);
-
-	for (uint32_t i = 0;; ++i)
+	if (!ELF_check())
 	{
-		if (!arr[i])
-			break ;
-		u_printf("string = [%s]\n", arr[i]);
-	}
+		ELF_Ident	*ident = (ELF_Ident *)ELF_RAW;
 
-	/* TODO : Header parsing part ! */
+		if (ELF_is64Bit())
+		{
+			ELF64_Hdr	*hdr64 = (ELF64_Hdr *)ident;
 
+			u_printf("%s\n", ELF64_Hdr_stringify(hdr64));
+		}
+		else
+		{
+//			ELF32_Hdr	*hdr32 = (ELF32_Hdr *)ident;
+
+//			u_printf("%s", ELF32_Hdr_stringify(hdr32));
+		}
+	}	
  	ELF_close();
+	
 	strtab_destroy(CELF_STRTAB);
 }

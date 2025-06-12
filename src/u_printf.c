@@ -2,8 +2,10 @@
  *	u_printf - internal functions
  */
 
-# include <stdlib.h>
-#include "u_printf.h"
+#include <unistd.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <stdint.h>
 
 /* UTILS **********************************************************************/
 
@@ -139,12 +141,10 @@ typedef struct	u_printf_ctx
 	char		*out;
 }	printf_ctx;
 
-static printf_ctx	__upf_ctx = {0};
+printf_ctx	__upf_ctx = {0};
 
 static inline void	__upf_ctx_init(void)
 {
-	__upf_ctx.len = 0;
-	__upf_ctx.total = 0;
 	if (!__upf_ctx.out)
 		__upf_ctx.out = malloc(1024 * sizeof(char));
 	if (!__upf_ctx.out)
@@ -261,7 +261,8 @@ static inline void	u_switch_flags(const char **fmt_ptr, va_list ap)
 			to_add = u_ptrtoa(va_arg(ap, unsigned long));
 			break ;
 		default:
-			u_dprintf(STDERR_FILENO, "u_printf: unknown format - %c\n", *fmt);
+			write(STDERR_FILENO, "Unsupported format.\n", 20);
+			exit(1);
 			return ;
 	}
 	uint32_t	len = u_strlen(to_add);
@@ -275,13 +276,6 @@ static inline void	u_switch_flags(const char **fmt_ptr, va_list ap)
 	}
 	__upf_ctx_cat(to_add, len);
 	*fmt_ptr = fmt;
-}
-
-
-__attribute__((format(printf, 1, 0)))
-int	u_vprintf(const char *fmt, va_list ap)
-{
-	return u_vdprintf(STDOUT_FILENO, fmt, ap);
 }
 
 __attribute__((format(printf, 2, 0)))
@@ -310,6 +304,12 @@ int	u_vdprintf(int fd, const char *fmt, va_list ap)
 		fmt++;
 	}
 	return (__upf_ctx.total);
+}
+
+__attribute__((format(printf, 1, 0)))
+int	u_vprintf(const char *fmt, va_list ap)
+{
+	return u_vdprintf(STDOUT_FILENO, fmt, ap);
 }
 
 __attribute__((format(printf, 1, 2)))

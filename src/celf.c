@@ -36,3 +36,18 @@ CELF_API(DESTRUCTOR void, ELF_close)
 	if (ELF_RAW != MAP_FAILED)
 		munmap(ELF_RAW, ELF_SIZE);
 }
+
+CELF_API(int, ELF_check)
+{
+	return (0);
+}
+
+CELF_API(inline int, ELF_is64Bit)
+{
+	return (ELF_RAW[EI_CLASS] == ELF_64BIT);
+}
+
+CELF_API(inline int, ELF_is32Bit)
+{
+	return (ELF_RAW[EI_CLASS] == ELF_32BIT);
+}

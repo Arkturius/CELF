@@ -60,6 +60,9 @@ typedef union
  *		e_shnum			Section header table entry count
  *		e_shstridx		Section header index for section names
  */
+# define CELF_STRUCT_STRINGIFY
+# if !defined(CELF_STRUCT_STRINGIFY)
+
 typedef struct
 {
 	ELF_Ident	e_ident;
@@ -77,6 +80,32 @@ typedef struct
 	uint16_t	e_shnum;
 	uint16_t	e_shstridx;
 }	PACKED ELF64_Hdr;
+
+# else
+
+# define	ELF64_HdrFields(X)												\
+	X(ELF_Ident,	e_ident, 0)												\
+	X(uint16_t,		e_type, STY_FORMAT_HEX)									\
+	X(uint16_t,		e_machine, STY_FORMAT_HEX)								\
+	X(uint32_t,		e_version, STY_FORMAT_HEX)								\
+	X(uint64_t,		e_entry, STY_FORMAT_HEX)								\
+	X(uint64_t,		e_phoff, STY_FORMAT_HEX)								\
+	X(uint64_t,		e_shoff, STY_FORMAT_HEX)								\
+	X(uint32_t,		e_flags, STY_FORMAT_HEX)								\
+	X(uint16_t,		e_hsize, STY_FORMAT_HEX)								\
+	X(uint16_t,		e_phsize, STY_FORMAT_HEX)								\
+	X(uint16_t,		e_phnum, STY_FORMAT_HEX)								\
+	X(uint16_t,		e_shsize, STY_FORMAT_HEX)								\
+	X(uint16_t,		e_shnum, STY_FORMAT_HEX)								\
+	X(uint16_t,		e_shstridx, STY_FORMAT_HEX)								\
+
+# define	STRUCT_PACKED
+# define	STRUCT_TYPE		ELF64_Hdr
+# define	STRUCT_FIELDS	ELF64_HdrFields
+
+# include <u_stringify.h>
+
+# endif
 
 /**
  * @struct	ELF32_Hdr
@@ -397,13 +426,29 @@ extern	CELF _celf_ctx;
 
 # include <celf_context.h>
 
-CELF_API(void, ELF_open, const char *filename);
-CELF_API(DESTRUCTOR void, ELF_close);
+CELF_API
+(void, ELF_open, const char *filename);
+
+CELF_API
+(DESTRUCTOR void, ELF_close);
+
+CELF_API
+(int, ELF_check);
+
+CELF_API
+(int, ELF_is64Bit);
+
+CELF_API
+(int, ELF_is32Bit);
 
 # if defined(CELF_STRIP_PREFIXES)
 
-#  define	ELF_open	celf_ELF_open
-#  define	ELF_close	celf_ELF_close
+#  define	ELF_open	CELF_FUNC(ELF_open)
+#  define	ELF_close	CELF_FUNC(ELF_close)
+#  define	ELF_check	CELF_FUNC(ELF_check)
+
+#  define	ELF_is64Bit	CELF_FUNC(ELF_is64Bit)
+#  define	ELF_is32Bit	CELF_FUNC(ELF_is32Bit)
 
 # endif
 
