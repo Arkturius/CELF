@@ -1,5 +1,5 @@
 /**
- *	stringify.h | generic stringify function generator
+ *	u_stringify.h | generic stringify function generator
  * -------------------------------------------------------------------------- */
 
 #if !defined(STY_UTILS_FLAG)

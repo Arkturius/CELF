@@ -51,6 +51,8 @@ uint32_t	u_strlen(const char *src);
 
 char		*u_strcat(char *dst, const char *src);
 
+int			u_strcmp(const char *s1, const char *s2);
+
 void		*u_memset(void *dst, int c, uint32_t n);
 
 #endif

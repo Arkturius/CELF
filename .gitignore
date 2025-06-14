@@ -7,3 +7,5 @@ build/
 a.out
 *test*
 *.so
+*.d
+*.out

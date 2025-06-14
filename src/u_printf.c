@@ -44,6 +44,16 @@ void	*u_memset(void *dst, int c, uint32_t n)
 	return (dst);
 }
 
+int	u_strcmp(const char *s1, const char *s2)
+{
+	while (*s1 && *s1 == *s2)
+	{
+		s1++;
+		s2++;
+	}
+	return (*s1 - *s2);
+}
+
 static const char	*u_lltoa(long l)
 {
 	static char	buff[22] = {0};
@@ -226,6 +236,7 @@ static inline void	u_switch_flags(const char **fmt_ptr, va_list ap)
 	const char	*to_add;
 	uint32_t	flags = 0;
 	uint32_t	pad = 0;
+	uint32_t	len = 0;
 	char		c;
 
 	flags = u_switch_prefix(&fmt, &pad);
@@ -233,8 +244,9 @@ static inline void	u_switch_flags(const char **fmt_ptr, va_list ap)
 	{
 		case 'c':
 			c = va_arg(ap, int);
-			__upf_ctx_cat(&c, 1);
-			return ;
+			to_add = &c;
+			len = 1;
+			goto end;
 		case 's':
 			to_add = va_arg(ap, char *);
 			break ;
@@ -265,7 +277,7 @@ static inline void	u_switch_flags(const char **fmt_ptr, va_list ap)
 			exit(1);
 			return ;
 	}
-	uint32_t	len = u_strlen(to_add);
+	len = u_strlen(to_add);
 	if (*fmt != 'p' && (flags & U_ZERO))
 	{
 		int	diff = pad - len - (*to_add == '-');
@@ -274,6 +286,8 @@ static inline void	u_switch_flags(const char **fmt_ptr, va_list ap)
 		while (diff-- > 0)
 			__upf_ctx_cat(&c, 1);
 	}
+
+end:
 	__upf_ctx_cat(to_add, len);
 	*fmt_ptr = fmt;
 }

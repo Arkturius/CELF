@@ -16,7 +16,6 @@
 
 typedef struct	_elf_s			ELF;
 typedef struct	_celf_ctx_s		CELF;
-typedef struct	_celf_strtab_s	STRTAB;
 
 /* UTILS MACROS ------------------------------------------------------------- */
 
@@ -25,8 +24,6 @@ typedef struct	_celf_strtab_s	STRTAB;
 # define	ELF_RAW			CELF_FILE.raw
 # define	ELF_SIZE		CELF_FILE.size
 # define	ELF_FILENAME	CELF_FILE.filename
-
-# define	CELF_STRTAB		CELF_CTX.strtab
 
 # define	HOST_IS_LE 0
 # if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
@@ -49,26 +46,39 @@ typedef struct	_celf_strtab_s	STRTAB;
 # endif
 
 # define	ELF_OFFSET(o)			(ELF_RAW + (o))
-# define	ELF_PTR_CHECK(ptr)		((ptr - ELF_RAW) < ELF_SIZE)
+# define	ELF_PTR_CHECK(ptr)		((ptr - ELF_RAW) >= ELF_SIZE)
 
 # define	UNUSED		__attribute__((unused))
 # define	PACKED		__attribute__((packed))
-# define	INLINE		static inline
 # define	DESTRUCTOR	__attribute__((destructor))
+# define	INLINE		static inline
 
 # if !defined(CONCAT) || !defined(CONCAT_INNER)
 #  define	CONCAT_INNER(a, b)	a##b
 #  define	CONCAT(a, b)		CONCAT_INNER(a, b)
 # endif
 
-# define	CELF_FUNC(name)				CONCAT(celf_, name)
-# define	CELF_API(type, name, ...)	type CELF_FUNC(name)(__VA_ARGS__)
+# define	CELF_API(type, name, ...)	type name(__VA_ARGS__)
+# define	CELF_PREFIX					CONCAT(ELF, CELF_CLASS)
+# define	CELF(X)						CONCAT(CELF_PREFIX, CONCAT(_, X))
+
+/* CONSTANTS ---------------------------------------------------------------- */
+
+# define	ELF_MINSIZE		sizeof(ELF32_Hdr)
 
 /* ERROR HANDLING ----------------------------------------------------------- */
 
-# define	_celf_fail_open	"open() call failed."
-# define	_celf_fail_stat	"stat() call failed."
-# define	_celf_fail_mmap	"mmap() call failed."
+# define	_celf_fail_open		"open() call failed."
+# define	_celf_fail_stat		"stat() call failed."
+# define	_celf_fail_mmap		"mmap() call failed."
+
+# define	_celf_fail_ptrchk	"invalid pointer offset."
+
+# define	_celf_invalid_magic		"invalid ELF Signature."
+# define	_celf_invalid_class		"invalid ELF Class."
+# define	_celf_invalid_endian	"invalid ELF Endianness."
+# define	_celf_invalid_version	"invalid ELF Version."
+# define	_celf_invalid_ABI		"unknown ABI."
 
 #define		CELF_ERROR(msg)													\
 {																			\

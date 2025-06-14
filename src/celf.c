@@ -3,7 +3,6 @@
  * -------------------------------------------------------------------------- */
 
 #include <celf.h>
-#include <strtab.h>
 
 CELF _celf_ctx = {0};
 
@@ -28,7 +27,7 @@ CELF_API(void, ELF_open, const char *filename)
 
 	ELF_RAW = (uint8_t *)ptr;
 	ELF_SIZE = (uint32_t)st.st_size;
-	ELF_FILENAME = strtab_alloc(CELF_STRTAB, filename);
+	ELF_FILENAME = filename;
 }
 
 CELF_API(DESTRUCTOR void, ELF_close)
@@ -39,15 +38,55 @@ CELF_API(DESTRUCTOR void, ELF_close)
 
 CELF_API(int, ELF_check)
 {
+	if (ELF_SIZE < ELF_MINSIZE)
+		return (1);
+	
+	ELF_Ident	ident = *(ELF_Ident *)ELF_RAW;
+
+	uint32_t	sig = *(uint32_t *)&ident.e_magic[0];
+
+	if (sig != ELF_MAGIC)
+	{
+		CELF_ERROR(_celf_invalid_magic);
+		return (1);
+	}
+	if (!ident.e_class || (ident.e_class & ~3))
+	{
+		CELF_ERROR(_celf_invalid_class);
+		return (1);
+	}
+	if (ident.e_endianness & ~3)
+	{
+		CELF_ERROR(_celf_invalid_endian);
+		return (1);
+	}
+	if (ident.e_version != 1)
+	{
+		CELF_ERROR(_celf_invalid_version);
+		return (1);
+	}
+	if (ident.e_ABI > 0x12)
+	{
+		CELF_ERROR(_celf_invalid_ABI);
+		return (1);
+	}
 	return (0);
 }
 
-CELF_API(inline int, ELF_is64Bit)
+CELF_API(inline int, ELF_is64bit)
 {
 	return (ELF_RAW[EI_CLASS] == ELF_64BIT);
 }
 
-CELF_API(inline int, ELF_is32Bit)
+CELF_API(inline int, ELF_is32bit)
 {
 	return (ELF_RAW[EI_CLASS] == ELF_32BIT);
 }
+
+# define	CELF_CLASS	64
+# include <celf_impl.h>
+# undef		CELF_CLASS
+
+# define	CELF_CLASS	32
+# include <celf_impl.h>
+# undef		CELF_CLASS

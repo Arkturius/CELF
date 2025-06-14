@@ -40,6 +40,8 @@ typedef union
 # define	ELF_MAG2	'L'
 # define	ELF_MAG3	'F'
 
+# define	ELF_MAGIC	0x464C457F
+
 /**
  * @struct	ELF64_Hdr
  *
@@ -60,9 +62,6 @@ typedef union
  *		e_shnum			Section header table entry count
  *		e_shstridx		Section header index for section names
  */
-# define CELF_STRUCT_STRINGIFY
-# if !defined(CELF_STRUCT_STRINGIFY)
-
 typedef struct
 {
 	ELF_Ident	e_ident;
@@ -81,42 +80,25 @@ typedef struct
 	uint16_t	e_shstridx;
 }	PACKED ELF64_Hdr;
 
-# else
-
-# define	ELF64_HdrFields(X)												\
-	X(ELF_Ident,	e_ident, 0)												\
-	X(uint16_t,		e_type, STY_FORMAT_HEX)									\
-	X(uint16_t,		e_machine, STY_FORMAT_HEX)								\
-	X(uint32_t,		e_version, STY_FORMAT_HEX)								\
-	X(uint64_t,		e_entry, STY_FORMAT_HEX)								\
-	X(uint64_t,		e_phoff, STY_FORMAT_HEX)								\
-	X(uint64_t,		e_shoff, STY_FORMAT_HEX)								\
-	X(uint32_t,		e_flags, STY_FORMAT_HEX)								\
-	X(uint16_t,		e_hsize, STY_FORMAT_HEX)								\
-	X(uint16_t,		e_phsize, STY_FORMAT_HEX)								\
-	X(uint16_t,		e_phnum, STY_FORMAT_HEX)								\
-	X(uint16_t,		e_shsize, STY_FORMAT_HEX)								\
-	X(uint16_t,		e_shnum, STY_FORMAT_HEX)								\
-	X(uint16_t,		e_shstridx, STY_FORMAT_HEX)								\
-
-# define	STRUCT_PACKED
-# define	STRUCT_TYPE		ELF64_Hdr
-# define	STRUCT_FIELDS	ELF64_HdrFields
-
-# include <u_stringify.h>
-
-# endif
-
 /**
  * @struct	ELF32_Hdr
  *
  * @brief		32-bit ELF Header.
  *
- *		header			ELF start of header 
+ *		e_ident			Identification bytes
+ *		e_type			File type
+ *		e_machine		Instruction set architecture
+ *		e_version		ELF version	(should always be 1)
  *		e_entry			Program entrypoint address
  *		e_phoff			Program header table offset
  *		e_shoff			Section header table offset
- *		footer			ELF end of header 
+ *		e_flags			Architecture-specific
+ *		e_hsize			ELF header size
+ *		e_phsize		Program header table entry size
+ *		e_phnum			Program header table entry count
+ *		e_shsize		Section header table entry size
+ *		e_shnum			Section header table entry count
+ *		e_shstridx		Section header index for section names
  */
 typedef struct
 {
@@ -421,35 +403,85 @@ typedef struct
 
 extern	CELF _celf_ctx;
 
-# define CELF_ENUMS_STRINGIFY
+// # define CELF_ENUMS_STRINGIFY
 # include <celf_enums.h>
 
 # include <celf_context.h>
 
-CELF_API
-(void, ELF_open, const char *filename);
+CELF_API(void, ELF_open, const char *filename);
 
-CELF_API
-(DESTRUCTOR void, ELF_close);
+CELF_API(DESTRUCTOR void, ELF_close);
 
-CELF_API
-(int, ELF_check);
+CELF_API(int, ELF_check);
 
-CELF_API
-(int, ELF_is64Bit);
+CELF_API(int, ELF_is64bit);
 
-CELF_API
-(int, ELF_is32Bit);
+CELF_API(int, ELF_is32bit);
 
-# if defined(CELF_STRIP_PREFIXES)
+#define _CELF_WRAPPER(														\
+	name, ret, type32, type64, wrap_args, args32, args64, call32, call64)	\
+																			\
+    type32 CONCAT(ELF32_, name) args32;										\
+    type64 CONCAT(ELF64_, name) args64;										\
+																			\
+    ret CONCAT(ELF_, name) wrap_args										\
+    {																		\
+        if (ELF_is32bit)													\
+            return CONCAT(ELF32_, name) call32;								\
+        return CONCAT(ELF64_, name) call64;									\
+    }
 
-#  define	ELF_open	CELF_FUNC(ELF_open)
-#  define	ELF_close	CELF_FUNC(ELF_close)
-#  define	ELF_check	CELF_FUNC(ELF_check)
+#define CELF_WRAPPER_PTR_VOID(name, type)									\
+    _CELF_WRAPPER(															\
+        name, void *,														\
+        CONCAT(ELF32_, type) *, CONCAT(ELF64_, type) *,						\
+        (void), (void), (void),												\
+        (), ()																\
+    )
 
-#  define	ELF_is64Bit	CELF_FUNC(ELF_is64Bit)
-#  define	ELF_is32Bit	CELF_FUNC(ELF_is32Bit)
+#define CELF_WRAPPER_PTR_SAME(name, type, args, call)						\
+    _CELF_WRAPPER(															\
+        name, void *,														\
+        CONCAT(ELF32_, type) *, CONCAT(ELF64_, type) *,						\
+        args, args, args,													\
+        call, call															\
+    )
 
-# endif
+#define CELF_WRAPPER_PTR_DIFF(name, ret, type)								\
+    _CELF_WRAPPER(															\
+        name, void *,														\
+        CONCAT(ELF32_, ret) *, CONCAT(ELF64_, ret) *,						\
+        (void *ptr),														\
+        (CONCAT(ELF32_, type) *ptr), (CONCAT(ELF64_, type) *ptr),			\
+        ((CONCAT(ELF32_, type) *)ptr), ((CONCAT(ELF64_, type) *)ptr)		\
+    )
+
+#define CELF_WRAPPER_GENERIC(												\
+	name, ret, type32, type64, wrap_args, args32, args64, call32, call64)	\
+																			\
+    _CELF_WRAPPER(															\
+        name, ret,															\
+        type32, type64,														\
+        wrap_args, args32, args64,											\
+        call32, call64														\
+    )
+
+CELF_WRAPPER_PTR_VOID(header_get, Hdr);
+
+// CELF_WRAPPER(Shdr, sheader_get)
+// CELF_WRAPPER(Phdr, pheader_get)
+
+CELF_WRAPPER_GENERIC(
+	section_content,
+	uint8_t *,
+	uint8_t *,
+	uint8_t *,
+	(void *section),
+	(CONCAT(ELF32_, Shdr) *section),
+	(CONCAT(ELF64_, Shdr) *section),
+	(section),
+	(section)
+)
+
 
 #endif	// _CELF_H

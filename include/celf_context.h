@@ -18,9 +18,9 @@
  */
 struct			_elf_s
 {
+	const char	*filename;
 	uint8_t		*raw;
 	uint32_t	size;
-	uint32_t	filename;
 };
 
 /**
@@ -32,8 +32,19 @@ struct			_elf_s
  */
 struct			_celf_ctx_s
 {
-	ELF						file;
-	struct _celf_strtab_s	*strtab;
+	ELF		file;
+	void	*header;
+
+	void		*sheaders;
+	uint64_t	sheaders_size;
+
+	void		*pheaders;
+	uint64_t	pheaders_size;
+
+	void		*symtab;
+	uint64_t	symtab_size;
+
+	void	*shstrtab;
 };
 
 #endif // _CELF_CONTEXT_H
