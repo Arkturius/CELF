@@ -1,46 +1,22 @@
-#include <celf.h>
+#include <u_flags.h>
 
-#define	SHIFT(ac, av)	(ac--, *av++)
+# define	NM_FLAGS(X)							\
+	X(U_FLAG_SIMPLE(NONE, 0, 'a')),				\
+	X(U_FLAG_DOUBLE(NONE, 0, debug_syms)),		\
 
-const char	*exe;
+// 	X(U_FLAG_SHORT(U_NONE, 'g', 1)),
+// 	X(U_FLAG_SHORT(U_NONE, 'u', 2)),
+// 	X(U_FLAG_SHORT(U_NONE, 'r', 3)),
+// 	X(U_FLAG_SHORT(U_NONE, 'p', 4)),
+// 	X(U_FLAG_LONG(U_NONE, "extern-only", 1)),
+// 	X(U_FLAG_LONG(U_NONE, "undefined-only", 2)),
+// 	X(U_FLAG_LONG(U_NONE, "reverse-sort", 3)),
+// 	X(U_FLAG_LONG(U_NONE, "no-sort", 4)),
 
-void	usage(int err)
-{
-	u_dprintf(STDERR_FILENO, "%s: No file provided\n", exe);
-	exit(err);
-}
-
-typedef struct
-{
-	const char	*name;
-	uint64_t	value : 56;
-	uint64_t	c : 8;
-}	SYM;
-
-typedef struct
-{
-	uint32_t	count;
-	SYM			table[];
-}	SYMTAB;
+U_FLAGS_GEN(nm, NM_FLAGS)
 
 int main(UNUSED int argc, UNUSED char **argv)
 {
-	exe = SHIFT(argc, argv);
-
-	if (argc != 1)
-		usage(1);
-
-	UNUSED const char	*filename = SHIFT(argc, argv);
-
-	ELF_open(filename);
-	if (!ELF_check())
-	{
-		if (ELF_is64bit())
-		{
-		}
-		else
-		{
-		}
-	}	
- 	ELF_close();
+	
 }
+

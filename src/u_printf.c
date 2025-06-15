@@ -33,13 +33,28 @@ char	*u_strcat(char *dst, const char *src)
 
 void	*u_memset(void *dst, int c, uint32_t n)
 {
-	unsigned char	*uchar;
+	uint8_t	*uchar;
 
 	if (dst)
 	{
 		uchar = dst;
 		while (n--)
 			*uchar++ = c;
+	}
+	return (dst);
+}
+
+void	*u_memcpy(void *dst, void *src, uint32_t n)
+{
+	uint8_t	*udst;
+	uint8_t	*usrc;
+
+	if (dst && src)
+	{
+		udst = dst;
+		usrc = src;
+		while (n--)
+			*udst++ = *usrc++;
 	}
 	return (dst);
 }

@@ -13,10 +13,10 @@
  *	Currently supported:
  *		formats:	c s i d u x p
  *		prefix:		l (for i, d, u and x) 0
- */
+ * -------------------------------------------------------------------------- */
 
-#ifndef UPRINTF_H
-# define UPRINTF_H
+#ifndef _UPRINTF_H
+# define _UPRINTF_H
 
 # include <unistd.h>
 # include <stdint.h>
@@ -55,4 +55,6 @@ int			u_strcmp(const char *s1, const char *s2);
 
 void		*u_memset(void *dst, int c, uint32_t n);
 
-#endif
+void		*u_memcpy(void *dst, void *src, uint32_t n);
+
+#endif // _UPRINTF_

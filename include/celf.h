@@ -403,7 +403,7 @@ typedef struct
 
 extern	CELF _celf_ctx;
 
-// # define CELF_ENUMS_STRINGIFY
+# define CELF_ENUMS_STRINGIFY
 # include <celf_enums.h>
 
 # include <celf_context.h>
@@ -426,7 +426,7 @@ CELF_API(int, ELF_is32bit);
 																			\
     ret CONCAT(ELF_, name) wrap_args										\
     {																		\
-        if (ELF_is32bit)													\
+        if (ELF_is32bit())													\
             return CONCAT(ELF32_, name) call32;								\
         return CONCAT(ELF64_, name) call64;									\
     }
@@ -438,6 +438,14 @@ CELF_API(int, ELF_is32bit);
         (void), (void), (void),												\
         (), ()																\
     )
+
+#define	CELF_WRAPPER_OTHER_VOID(name, type)									\
+	_CELF_WRAPPER(															\
+		name, type,															\
+		type, type,															\
+		(void), (void), (void),												\
+		(), ()																\
+	)
 
 #define CELF_WRAPPER_PTR_SAME(name, type, args, call)						\
     _CELF_WRAPPER(															\
@@ -466,11 +474,43 @@ CELF_API(int, ELF_is32bit);
         call32, call64														\
     )
 
-CELF_WRAPPER_PTR_VOID(header_get, Hdr);
+/**
+ *	@brief	ELF_header_get()
+ * -------------------------------------------------------------------------- */
+CELF_WRAPPER_PTR_VOID(
+	header_get,
+	Hdr
+)
 
-// CELF_WRAPPER(Shdr, sheader_get)
-// CELF_WRAPPER(Phdr, pheader_get)
+/**
+ *	@brief	ELF_sheaders_get()
+ * -------------------------------------------------------------------------- */
+CELF_WRAPPER_PTR_VOID(
+	sheaders_get,
+	Shdr
+)
 
+CELF_WRAPPER_OTHER_VOID(
+	sheaders_size,
+	uint16_t
+)
+
+/**
+ *	@brief	ELF_pheaders_get()
+ * -------------------------------------------------------------------------- */
+CELF_WRAPPER_PTR_VOID(
+	pheaders_get,
+	Phdr
+)
+
+CELF_WRAPPER_OTHER_VOID(
+	pheaders_size,
+	uint16_t
+)
+
+/**
+ *	@brief	ELF_section_content(void *section)
+ * -------------------------------------------------------------------------- */
 CELF_WRAPPER_GENERIC(
 	section_content,
 	uint8_t *,
@@ -483,5 +523,30 @@ CELF_WRAPPER_GENERIC(
 	(section)
 )
 
+/**
+ *	@brief	ELF_shstrtab_get()
+ * -------------------------------------------------------------------------- */
+CELF_WRAPPER_OTHER_VOID(
+	shstrtab_get,
+	char *
+)
+
+/**
+ *	@brief	ELF_sheader_get_by_name(const char *target)
+ * -------------------------------------------------------------------------- */
+CELF_WRAPPER_PTR_SAME(
+	sheader_get_by_name,
+	Shdr,
+	(const char *target),
+	(target)
+)
+
+/**
+ *	@brief	ELF_symbols_get()
+ * -------------------------------------------------------------------------- */
+CELF_WRAPPER_PTR_VOID(
+	symbols_get,
+	Sym
+)
 
 #endif	// _CELF_H
