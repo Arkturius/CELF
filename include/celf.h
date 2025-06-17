@@ -403,7 +403,6 @@ typedef struct
 
 extern	CELF _celf_ctx;
 
-# define CELF_ENUMS_STRINGIFY
 # include <celf_enums.h>
 
 # include <celf_context.h>

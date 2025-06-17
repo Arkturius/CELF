@@ -28,9 +28,14 @@
 
 U_FLAGS_GEN(nm, NM_FLAGS, "List symbols in [file(s)] (a.out by default).")
 
+#define CELF_ENUMS_STRINGIFY
+#include <celf.h>
+
 int main(UNUSED int argc, UNUSED char **argv)
 {
 	uint64_t	flags = nm_flags_parse(argc, argv);
+
+	u_printf("%s\n", ELF_DynamicTag_stringify(33));
 
 	if (flags == U_FLAGS_FAIL)
 		nm_usage(1);
