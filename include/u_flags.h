@@ -8,82 +8,134 @@
 # include <u_printf.h>
 # include <u_data.h>
 
-# define	u_FlagSpecList(X)												\
-	X(U_FLAG_ATYPE_NONE,	1 << 8)											\
-	X(U_FLAG_ATYPE_INT,		1 << 9)											\
-	X(U_FLAG_ATYPE_STRING,	1 << 10)										\
-	X(U_FLAG_DTYPE_SIMPLE,	1 << 16)										\
-	X(U_FLAG_DTYPE_DOUBLE,	1 << 17)										\
+typedef struct _u_flag_ctx	u_flag_ctx;
+typedef struct _u_flag		u_flag;
 
-# define	ENUM_TYPE	u_FlagSpec
-# define	ENUM_LIST	u_FlagSpec
-# include <u_stringify.h>
-
-# define	U_NONE		U_FLAG_ATYPE_NONE
-# define	U_STRING	U_FLAG_ATYPE_STRING
-# define	U_INTEGER	U_FLAG_ATYPE_INT
-
-# define	U_FLAG_POS_MASK(X)		(((X) & 0x3F) << 24)
-
-typedef struct _u_flag
+struct _u_flag_ctx
 {
-	u_FlagSpec	type;
+	u_flag	*flags;
+};
+
+struct _u_flag
+{
+	uint64_t	type;
 	char		*flag;
 	union
 	{
 		int64_t		ival;
 		char		*sval;
 	};
-}	u_flagdef;
+};
 
-#define U_SIMPLE_FLAG_DEF(argtype, bit, letter)								\
+enum _u_flag_type
+{
+	U_NONE		= 1 << 8,
+	U_INT		= 1 << 9,	// TODO : Handle argument values.
+	U_STRING	= 1 << 10,
+	U_FLOAT		= 1 << 11,
+}	u_flag_type;
+
+typedef unsigned long long	u_flags;
+
+# define	U_FLAGS_FAIL						-1u
+
+# define	U_FLAG_CHK(mask, flag)				(mask & (1 << flag))
+
+# define	U_SHIFT(ac, av)						(ac--, *av++)
+
+# define	U_FLAGS_LIST(scope)					U_CONCAT(scope, _flaglist)
+
+# define	U_FLAGS_ENUM_GEN(n, t, c, s, d)		n,
+
+# define	U_FLAGS_STRUCT_GEN(n, t, c, s, d)								\
+																			\
+	[n] = (u_flag) { .type = t | c, .flag = s, .ival = 0},					\
+
+# define	U_FLAGS_CASE_GEN(n, t, c, s, d)									\
+																			\
+	case c: { mask |= (1 << n); continue; }									\
+
+# define	U_FLAGS_LONGOPT_GEN(n, t, c, s, d)								\
+																			\
+	if (!u_strcmp(flag, s)) { mask |= (1 << n); continue; }					\
+
+# define	U_FLAGS_USAGE_GEN(n, t, c, s, d)								\
+																			\
+	u_printf("  -%c%s --%-16s %s\n", c, s ? "," : "", s ? s : "", d);		\
+
+
+# define	U_FLAGS_HELP(scope, X)											\
+	X(																		\
+		U_CONCAT(scope, _HELP), U_NONE, 'h', "help",						\
+		"Display this information"											\
+	)																		\
+
+# define	U_FLAGS_GEN(scope, list, desc)									\
+																			\
+u_flag_ctx	_uflags_ctx	= {0};												\
+																			\
+enum U_CONCAT(scope, _bitflags)												\
+{																			\
+	U_CONCAT(scope, _FIRST),												\
+	list(U_FLAGS_ENUM_GEN)													\
+	U_CONCAT(scope, _HELP),													\
+	U_CONCAT(scope, _LAST),													\
+};																			\
+																			\
+UNUSED																		\
+static const u_flag	U_CONCAT(scope, _flaglist)[U_CONCAT(scope, _LAST)] =	\
+{																			\
+	[0] = (u_flag) { .type = 0, .flag = 0, .ival = 0 },						\
+	list(U_FLAGS_STRUCT_GEN)												\
+};																			\
+																			\
+void	U_CONCAT(scope, _usage)(int ret)									\
+{																			\
+	int	fd_out = 1 + !!ret;													\
+																			\
+	u_dprintf(fd_out, "Usage: %s [option(s)] [file(s)]\n", #scope);			\
+	u_dprintf(fd_out, " %s\n", desc);										\
+	u_dprintf(fd_out, " The options are:\n");								\
+	list(U_FLAGS_USAGE_GEN)													\
+	U_FLAGS_HELP(scope, U_FLAGS_USAGE_GEN)									\
+	exit(ret);																\
+}																			\
+																			\
+u_flags	U_CONCAT(scope, _flags_parse)(int argc, char **argv)				\
+{																			\
+	UNUSED const char	*exe = U_SHIFT(argc, argv);							\
+	u_flags				mask = 0;											\
+																			\
+	while (argc)															\
 	{																		\
-		.type =																\
-			(letter)														\
-			| U_FLAG_DTYPE_SIMPLE											\
-			| U_FLAG_ATYPE_##argtype										\
-			| U_FLAG_POS_MASK(bit),											\
-		.flag = 0,															\
-		.ival = 0															\
+		const char	*flag = U_SHIFT(argc, argv);							\
+																			\
+		if (*flag == '-')													\
+		{																	\
+			flag++;															\
+			if (*flag == '-')												\
+			{																\
+				flag++;														\
+				list(U_FLAGS_LONGOPT_GEN)									\
+				U_FLAGS_HELP(scope, U_FLAGS_LONGOPT_GEN)					\
+				return (-1u);												\
+			}																\
+			switch (*flag)													\
+			{																\
+				list(U_FLAGS_CASE_GEN)										\
+				U_FLAGS_HELP(scope, U_FLAGS_CASE_GEN)						\
+				default:													\
+				{															\
+					u_printf("%s: invalid option -- '%c'\n", #scope, *flag);\
+					return (-1u);											\
+				}															\
+			}																\
+			return (-1u);													\
+		}																	\
 	}																		\
-#define U_DOUBLE_FLAG_DEF(argtype, bit, name)								\
-	{																		\
-		.type =																\
-			U_FLAG_DTYPE_DOUBLE												\
-			| U_FLAG_ATYPE_##argtype										\
-			| U_FLAG_POS_MASK(bit),											\
-		.flag = (#name),													\
-		.ival = 0															\
-	}																		\
-
-# define	U_SIMPLE_FLAG_BIT(argtype, bit, letter)							\
-	FLAG_##letter = bit														\
-
-# define	U_DOUBLE_FLAG_BIT(argtype, bit, name)							\
-	FLAG_##name = bit														\
-
-# define	U_FLAG_SIMPLE(argtype, bit, letter)								\
-	U_SIMPLE, argtype, bit, letter											\
-
-# define	U_FLAG_DOUBLE(argtype, bit, name)								\
-	U_DOUBLE, argtype, bit, name											\
-
-# define	U_FLAG_BIT_GEN(spec)											\
-	U_FLAG_BIT_DISPATCH(spec)												\
-
-# define	U_FLAG_DEF_GEN(spec)											\
-	U_FLAG_DEF_DISPATCH(spec)												\
-
-# define	U_FLAG_BIT_DISPATCH(type, ...)									\
-	type##_FLAG_BIT(__VA_ARGS__)											\
-
-# define	U_FLAG_DEF_DISPATCH(type, ...)									\
-	type##_FLAG_DEF(__VA_ARGS__)											\
-
-# define	U_FLAGS_GEN(name, list)			\
-typedef enum								\
-{											\
-	list(U_FLAG_BIT_GEN)					\
-}	name##_u_bitflags;						\
+	if (mask & (1 << U_CONCAT(scope, _HELP)))								\
+		U_CONCAT(scope, _usage)(0);											\
+	return (mask);															\
+}																			\
 
 #endif // _UFLAGS_H

@@ -14,14 +14,14 @@
  *	linked lists.
  * -------------------------------------------------------------------------- */
 
-# define	_UCONCAT(a, b)	a##b
-# define	UCONCAT(a, b)	_UCONCAT(a, b)
+# define	_U_CONCAT(a, b)	a##b
+# define	U_CONCAT(a, b)	_U_CONCAT(a, b)
 
 # define	UNUSED	__attribute__((unused))
 
-# define	U_LIST(type)			UCONCAT(type, _list)
-# define	U_LIST_S(type)			UCONCAT(U_LIST(type), _s)
-# define	U_LIST_FNAME(type, n)	UCONCAT(U_LIST(type), n)
+# define	U_LIST(type)			U_CONCAT(type, _list)
+# define	U_LIST_S(type)			U_CONCAT(U_LIST(type), _s)
+# define	U_LIST_FNAME(type, n)	U_CONCAT(U_LIST(type), n)
 
 # define	U_LIST_DECL(type)												\
 																			\

@@ -12,7 +12,7 @@
  *
  *	Currently supported:
  *		formats:	c s i d u x p
- *		prefix:		l (for i, d, u and x) 0
+ *		prefix:		l (for i, d, u and x) 0 (N) -
  * -------------------------------------------------------------------------- */
 
 #ifndef _UPRINTF_H

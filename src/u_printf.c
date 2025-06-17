@@ -206,8 +206,11 @@ static inline void	__upf_ctx_cat(const char *src, uint32_t len)
 
 enum	uprintf_flags
 {
-	U_LONG	= 1 << 0,
-	U_ZERO	= 1 << 2,
+	U_LONG		= 1 << 0,
+	U_ZERO		= 1 << 2,
+	U_MINUS		= 1 << 3,
+	U_PADDED	= 1 << 4,
+	U_INVALID	= 1 << 31
 };
 
 static inline uint32_t	u_switch_len(const char **fmt_ptr)
@@ -230,12 +233,20 @@ static inline uint32_t	u_switch_prefix(const char **fmt_ptr, uint32_t *pad_ptr)
 	uint32_t	flags = 0;
 
 	fmt++;
-	if (*fmt == '0')
+	if (*fmt == '-')
 	{
-		flags |= U_ZERO;
 		fmt++;
+		flags |= U_MINUS;
+	}
+	if (*fmt >= '0' && *fmt <= '9')
+	{
+		if (*fmt == '0' && !(flags & U_MINUS))
+			flags |= U_ZERO;
+		flags |= U_PADDED;
 		*pad_ptr = u_switch_len(&fmt);
 	}
+	if ((flags & U_MINUS) && !(flags & (U_PADDED)))
+		flags |= U_INVALID;
 	if (*fmt == 'l')
 	{
 		flags |= U_LONG;
@@ -255,6 +266,8 @@ static inline void	u_switch_flags(const char **fmt_ptr, va_list ap)
 	char		c;
 
 	flags = u_switch_prefix(&fmt, &pad);
+	if (flags & U_INVALID)
+		exit(1);
 	switch (*fmt)
 	{
 		case 'c':
@@ -293,17 +306,27 @@ static inline void	u_switch_flags(const char **fmt_ptr, va_list ap)
 			return ;
 	}
 	len = u_strlen(to_add);
-	if (*fmt != 'p' && (flags & U_ZERO))
+	int	diff = pad - len - (*to_add == '-' && *fmt != 's');
+	
+	if (*fmt != 'p' && (flags & (U_ZERO | U_PADDED)))
 	{
-		int	diff = pad - len - (*to_add == '-');
 
-		c = '0';
-		while (diff-- > 0)
-			__upf_ctx_cat(&c, 1);
+		c = flags & U_ZERO ? '0' : ' ';
+
+		if (!(flags & U_MINUS))
+		{
+			while (diff-- > 0)
+				__upf_ctx_cat(&c, 1);
+		}
 	}
 
 end:
 	__upf_ctx_cat(to_add, len);
+	if (flags & U_MINUS)
+	{
+		while (diff-- > 0)
+			__upf_ctx_cat(&c, 1);
+	}
 	*fmt_ptr = fmt;
 }
 
