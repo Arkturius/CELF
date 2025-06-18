@@ -32,7 +32,7 @@ int main(UNUSED int argc, UNUSED char **argv)
 {
 	uint64_t	flags = nm_flags_parse(argc, argv);
 
-	if (flags == U_FLAGS_FAIL)
+	if (nm_flags_check(flags))
 		nm_usage(1);
 }
 

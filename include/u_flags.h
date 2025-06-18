@@ -37,6 +37,8 @@ enum _u_flag_type
 
 typedef unsigned long long	u_flags;
 
+# define	INLINE			static inline
+
 # define	U_FLAGS_FAIL						-1u
 
 # define	U_FLAG_CHK(mask, flag)				(mask & (1 << flag))
@@ -89,7 +91,7 @@ static const u_flag	U_CONCAT(scope, _flaglist)[U_CONCAT(scope, _LAST)] =	\
 	list(U_FLAGS_STRUCT_GEN)												\
 };																			\
 																			\
-void	U_CONCAT(scope, _usage)(int ret)									\
+INLINE void	U_CONCAT(scope, _usage)(int ret)								\
 {																			\
 	int	fd_out = 1 + !!ret;													\
 																			\
@@ -101,7 +103,7 @@ void	U_CONCAT(scope, _usage)(int ret)									\
 	exit(ret);																\
 }																			\
 																			\
-u_flags	U_CONCAT(scope, _flags_parse)(int argc, char **argv)				\
+INLINE u_flags	U_CONCAT(scope, _flags_parse)(int argc, char **argv)		\
 {																			\
 	UNUSED const char	*exe = U_SHIFT(argc, argv);							\
 	u_flags				mask = 0;											\
@@ -136,6 +138,11 @@ u_flags	U_CONCAT(scope, _flags_parse)(int argc, char **argv)				\
 	if (mask & (1 << U_CONCAT(scope, _HELP)))								\
 		U_CONCAT(scope, _usage)(0);											\
 	return (mask);															\
+}																			\
+																			\
+INLINE int U_CONCAT(scope, _flags_check)(u_flags mask)						\
+{																			\
+	return (mask != U_FLAGS_FAIL);											\
 }																			\
 
 #endif // _UFLAGS_H
