@@ -404,7 +404,6 @@ typedef struct
 extern	CELF _celf_ctx;
 
 # include <celf_enums.h>
-
 # include <celf_context.h>
 
 CELF_API(int, ELF_open, const char *filename);
