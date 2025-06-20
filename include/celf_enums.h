@@ -207,7 +207,8 @@ enum	ELF_SectionFlags
 	SHF_MASKOS				= 0x0FF00000,
 	SHF_MASKPROC			= 0xF0000000,
 	SHF_ORDERED				= 0x4000000,
-	SHF_EXCLUDE				= 0x8000000
+	SHF_EXCLUDE				= 0x8000000,
+	SHF_SOLARIS				= 0x80000000,
 };
 
 enum	ELF_SymbolVisibility
@@ -246,6 +247,19 @@ enum	ELF_SymbolType
 	STT_HIOS		= 12,
 	STT_LOPROC		= 13,
 	STT_HIPROC		= 15,
+};
+
+enum	ELF_SectionIndices
+{
+	SHN_UNDEF		= 0,
+	SHN_LORESERVE	= 0xFF00,
+	SHN_LOPROC		= 0xFF00,
+	SHN_BEFORE		= 0xFF00,
+	SHN_AFTER		= 0xFF01,
+	SHN_HIPROC		= 0xFF1F,
+	SHN_ABS			= 0xFFF1,
+	SHN_COMMON		= 0xFFF2,
+	SHN_HIRESERVE	= 0xFFFF,
 };
 
 enum	ELF_DynamicTag
@@ -524,6 +538,7 @@ enum	ELF_DynamicTag
 	X(SHF_MASKPROC,			0xF0000000)										\
 	X(SHF_ORDERED,			0x4000000)										\
 	X(SHF_EXCLUDE,			0x800000)										\
+	X(SHF_SOLARIS,			0x80000000)										\
 
 #  define	ENUM_TYPE	ELF_SectionFlags
 #  define	ENUM_LIST	ELF_SectionFlagsList

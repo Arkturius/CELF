@@ -126,6 +126,21 @@ uint8_t	*CELF(section_content)(CELF(Shdr) *section)
 }
 
 /**
+ *	@brief	ELF_section_name()
+ *
+ *	@return	Raw pointer to section name inside of shstrtab.
+ * -------------------------------------------------------------------------- */
+const char	*CELF(section_name)(CELF(Shdr) *section)
+{
+	char		*shstrtab = CELF(shstrtab_get)();
+	uint32_t	name_idx = READ_FIELD(section->sh_name);
+	
+	const char	*name = shstrtab + name_idx;
+
+	return (name);
+}
+
+/**
  *	@brief	ELF_shstrtab_get()
  *
  *	@return	char pointer to the section names strtab.
@@ -172,7 +187,25 @@ CELF(Shdr)	*CELF(sheader_get_by_name)(const char *target)
 	return (NULL);
 }
 
-CELF(Sym)	*CELF(symbols_get)(void)
+/**
+ *	@brief	ELF_sheader_get_by_idx(uint16_t n)
+ *
+ *	@return	Pointer to the n-th section header.
+ * -------------------------------------------------------------------------- */
+CELF(Shdr)	*CELF(sheader_get_by_idx)(uint16_t n)
+{
+	CELF(Shdr)	*sheaders = CELF(sheaders_get)();
+	uint16_t	sheaders_size = CELF(sheaders_size)();
+
+	if (n >= sheaders_size)
+		return (NULL);
+
+	CELF(Shdr)	*section = sheaders + n;
+
+	return (section);
+}
+
+CELF(Sym)	*CELF(symtab_get)(void)
 {
 	if (!CELF_CTX.symtab)
 	{
@@ -181,4 +214,24 @@ CELF(Sym)	*CELF(symbols_get)(void)
 		CELF_CTX.symtab = (CELF(Sym) *)CELF(section_content)(symtab_hdr);
 	}
 	return ((CELF(Sym) *)CELF_CTX.symtab);
+}
+
+uint64_t	CELF(symtab_size)(void)
+{
+	if (!CELF_CTX.symtab_size)
+	{
+		CELF(Shdr)	*symtab_hdr = CELF(sheader_get_by_name)(".symtab");
+
+		if (!symtab_hdr)
+			return (0);
+
+		CELF_UINT	fullsize = READ_FIELD(symtab_hdr->sh_size);
+		CELF_UINT	entsize = READ_FIELD(symtab_hdr->sh_entsize);
+
+		if (entsize == 0)
+			CELF_THROW(_celf_fail_zerodiv);
+
+		CELF_CTX.symtab_size = (uint64_t) fullsize / entsize;
+	}
+	return (CELF_CTX.symtab_size);
 }

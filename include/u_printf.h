@@ -25,21 +25,25 @@
 /**
  *	uprintf	- writes formatted string to SDTOUT
  */
+__attribute__((format(printf, 1, 2)))
 int	u_printf(const char *fmt, ...);
 
 /**
  *	udprintf	- writes formatted string to fd
  */
+__attribute__((format(printf, 2, 3)))
 int	u_dprintf(int fd, const char *fmt, ...);
 
 /**
  *	uvprintf	- writes formatted string to STDIN, using va_list
  */
+__attribute__((format(printf, 1, 0)))
 int	u_vprintf(const char *fmt, va_list ap);
 
 /**
  *	uvdprintf	- writes formatted string to fd, using va_list
  */
+__attribute__((format(printf, 2, 0)))
 int	u_vdprintf(int fd, const char *fmt, va_list ap);
 
 
@@ -52,6 +56,8 @@ uint32_t	u_strlen(const char *src);
 char		*u_strcat(char *dst, const char *src);
 
 int			u_strcmp(const char *s1, const char *s2);
+
+int			u_strncmp(const char *s1, const char *s2, uint32_t n);
 
 void		*u_memset(void *dst, int c, uint32_t n);
 

@@ -69,6 +69,18 @@ int	u_strcmp(const char *s1, const char *s2)
 	return (*s1 - *s2);
 }
 
+int	u_strncmp(const char *s1, const char *s2, uint32_t n)
+{
+	while (*s1 && *s1 == *s2 && n--)
+	{
+		s1++;
+		s2++;
+	}
+	if (!*s1 || !*s2)
+		return (0);
+	return (*s1 - *s2);
+}
+
 static const char	*u_lltoa(long l)
 {
 	static char	buff[22] = {0};
@@ -166,40 +178,44 @@ typedef struct	u_printf_ctx
 	char		*out;
 }	printf_ctx;
 
-printf_ctx	__upf_ctx = {0};
+printf_ctx	_uprintf_ctx = {0};
 
-static inline void	__upf_ctx_init(void)
+static inline void	_uprintf_ctx_init(void)
 {
-	if (!__upf_ctx.out)
-		__upf_ctx.out = malloc(1024 * sizeof(char));
-	if (!__upf_ctx.out)
+	if (!_uprintf_ctx.out)
+		_uprintf_ctx.out = malloc(1024 * sizeof(char));
+	if (!_uprintf_ctx.out)
 		exit(1);
 }
 
 __attribute__((destructor))
-static void	__upf_ctx_destroy(void)
+static void	_uprintf_ctx_destroy(void)
 {
-	free(__upf_ctx.out);
+	if (_uprintf_ctx.out)
+	{
+		free(_uprintf_ctx.out);
+		_uprintf_ctx.out = NULL;
+	}
 }
 
 static inline void	__upf_flush(void)
 {
-	int	w = write(__upf_ctx.fd, __upf_ctx.out, __upf_ctx.len);
+	int	w = write(_uprintf_ctx.fd, _uprintf_ctx.out, _uprintf_ctx.len);
 	
 	if (w < 0)
 		exit(1);
-	__upf_ctx.total += w;
-	__upf_ctx.len = 0;
+	_uprintf_ctx.total += w;
+	_uprintf_ctx.len = 0;
 }
 
-static inline void	__upf_ctx_cat(const char *src, uint32_t len)
+static inline void	_uprintf_ctx_cat(const char *src, uint32_t len)
 {
-	if (__upf_ctx.len + len >= 1024)
+	if (_uprintf_ctx.len + len >= 1024)
 		__upf_flush();
 
 	while (len--)
-		__upf_ctx.out[__upf_ctx.len++] = *src++;
-	__upf_ctx.out[__upf_ctx.len] = 0;
+		_uprintf_ctx.out[_uprintf_ctx.len++] = *src++;
+	_uprintf_ctx.out[_uprintf_ctx.len] = 0;
 }
 
 /* PRINTER ********************************************************************/
@@ -316,28 +332,27 @@ static inline void	u_switch_flags(const char **fmt_ptr, va_list ap)
 		if (!(flags & U_MINUS))
 		{
 			while (diff-- > 0)
-				__upf_ctx_cat(&c, 1);
+				_uprintf_ctx_cat(&c, 1);
 		}
 	}
 
 end:
-	__upf_ctx_cat(to_add, len);
+	_uprintf_ctx_cat(to_add, len);
 	if (flags & U_MINUS)
 	{
 		while (diff-- > 0)
-			__upf_ctx_cat(&c, 1);
+			_uprintf_ctx_cat(&c, 1);
 	}
 	*fmt_ptr = fmt;
 }
 
-__attribute__((format(printf, 2, 0)))
 int	u_vdprintf(int fd, const char *fmt, va_list ap)
 {
 	if (!fmt)
 		return (-1);
 
-	__upf_ctx_init();
-	__upf_ctx.fd = fd;
+	_uprintf_ctx_init();
+	_uprintf_ctx.fd = fd;
 	while (*fmt)
 	{
 		switch (*fmt)
@@ -346,39 +361,23 @@ int	u_vdprintf(int fd, const char *fmt, va_list ap)
 				u_switch_flags(&fmt, ap);
 				break ;
 			case '\n':
-				__upf_ctx_cat(fmt, 1);
+				_uprintf_ctx_cat(fmt, 1);
 				__upf_flush();
 				break ;
 			default:
-				__upf_ctx_cat(fmt, 1);
+				_uprintf_ctx_cat(fmt, 1);
 				break ;
 		}
 		fmt++;
 	}
-	return (__upf_ctx.total);
+	return (_uprintf_ctx.total);
 }
 
-__attribute__((format(printf, 1, 0)))
 int	u_vprintf(const char *fmt, va_list ap)
 {
 	return u_vdprintf(STDOUT_FILENO, fmt, ap);
 }
 
-__attribute__((format(printf, 1, 2)))
-int	u_printf(const char *fmt, ...)
-{
-	int		res;
-	va_list	ap;
-
-	if (!fmt)
-		return (-1);
-	va_start(ap, fmt);
-	res = u_vprintf(fmt, ap);
-	va_end(ap);
-	return (res);
-}
-
-__attribute__((format(printf, 2, 3)))
 int	u_dprintf(int fd, const char *fmt, ...)
 {
 	int		res;
@@ -388,6 +387,19 @@ int	u_dprintf(int fd, const char *fmt, ...)
 		return (-1);
 	va_start(ap, fmt);
 	res = u_vdprintf(fd, fmt, ap);
+	va_end(ap);
+	return (res);
+}
+
+int	u_printf(const char *fmt, ...)
+{
+	int		res;
+	va_list	ap;
+
+	if (!fmt)
+		return (-1);
+	va_start(ap, fmt);
+	res = u_vprintf(fmt, ap);
 	va_end(ap);
 	return (res);
 }

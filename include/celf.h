@@ -407,14 +407,11 @@ extern	CELF _celf_ctx;
 
 # include <celf_context.h>
 
-CELF_API(void, ELF_open, const char *filename);
-
+CELF_API(int, ELF_open, const char *filename);
 CELF_API(DESTRUCTOR void, ELF_close);
 
 CELF_API(int, ELF_check);
-
 CELF_API(int, ELF_is64bit);
-
 CELF_API(int, ELF_is32bit);
 
 #define _CELF_WRAPPER(														\
@@ -523,6 +520,21 @@ CELF_WRAPPER_GENERIC(
 )
 
 /**
+ *	@brief	ELF_section_content(void *section)
+ * -------------------------------------------------------------------------- */
+CELF_WRAPPER_GENERIC(
+	section_name,
+	const char *,
+	const char *,
+	const char *,
+	(void *section),
+	(CONCAT(ELF32_, Shdr) *section),
+	(CONCAT(ELF64_, Shdr) *section),
+	(section),
+	(section)
+)
+
+/**
  *	@brief	ELF_shstrtab_get()
  * -------------------------------------------------------------------------- */
 CELF_WRAPPER_OTHER_VOID(
@@ -541,11 +553,29 @@ CELF_WRAPPER_PTR_SAME(
 )
 
 /**
+ *	@brief	ELF_sheader_get_by_idx(uint16_t idx)
+ * -------------------------------------------------------------------------- */
+CELF_WRAPPER_PTR_SAME(
+	sheader_get_by_idx,
+	Shdr,
+	(uint16_t idx),
+	(idx)
+)
+
+/**
  *	@brief	ELF_symbols_get()
  * -------------------------------------------------------------------------- */
 CELF_WRAPPER_PTR_VOID(
-	symbols_get,
+	symtab_get,
 	Sym
+)
+
+/**
+ *	@brief	ELF_symbols_get()
+ * -------------------------------------------------------------------------- */
+CELF_WRAPPER_OTHER_VOID(
+	symtab_size,
+	uint64_t
 )
 
 #endif	// _CELF_H

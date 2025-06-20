@@ -73,6 +73,7 @@ typedef struct	_celf_ctx_s		CELF;
 # define	_celf_fail_mmap		"mmap() call failed."
 
 # define	_celf_fail_ptrchk	"invalid pointer offset."
+# define	_celf_fail_zerodiv	"division by zero incoming."
 
 # define	_celf_invalid_magic		"invalid ELF Signature."
 # define	_celf_invalid_class		"invalid ELF Class."

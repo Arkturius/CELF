@@ -29,7 +29,7 @@ typedef struct U_LIST_S(type)												\
 {																			\
 	struct U_LIST_S(type)	*next;											\
 	type					data;											\
-}	*U_LIST(type)															\
+}	U_LIST(type)															\
 
 # define	U_LIST_INOUT(type)												\
 																			\
@@ -42,10 +42,10 @@ typedef struct U_LIST_S(type)												\
 
 # define	U_LIST_DECL_NEW(type)											\
 																			\
-	UNUSED static inline U_LIST(type)										\
+	UNUSED static inline U_LIST(type) *										\
 	U_LIST_FNAME(type, _new)(type data)										\
 	{																		\
-		U_LIST(type)	new = malloc(sizeof(struct U_LIST_S(type)));		\
+		U_LIST(type)	*new = malloc(sizeof(U_LIST(type)));				\
 																			\
 		if (new)															\
 			new->data = data;												\
@@ -55,9 +55,9 @@ typedef struct U_LIST_S(type)												\
 # define	U_LIST_DECL_LEN(type)											\
 																			\
 	UNUSED static inline uint32_t											\
-	U_LIST_FNAME(type, _len)(U_LIST(type) list)								\
+	U_LIST_FNAME(type, _len)(U_LIST(type) *list)							\
 	{																		\
-		U_LIST(type)	tmp = list;											\
+		U_LIST(type)	*tmp = list;										\
 		uint32_t		count = 0;											\
 																			\
 		while (tmp)															\
@@ -70,8 +70,8 @@ typedef struct U_LIST_S(type)												\
 
 # define	U_LIST_DECL_PUSH(type)											\
 																			\
-	UNUSED static inline U_LIST(type)										\
-	U_LIST_FNAME(type, _push)(U_LIST(type) *list, U_LIST(type) new)			\
+	UNUSED static inline U_LIST(type) *										\
+	U_LIST_FNAME(type, _push)(U_LIST(type) **list, U_LIST(type) *new)		\
 	{																		\
 		if (new)															\
 		{																	\
@@ -83,20 +83,20 @@ typedef struct U_LIST_S(type)												\
 
 # define	U_LIST_DECL_PUSH_RAW(type)										\
 																			\
-	UNUSED static inline U_LIST(type)										\
-	U_LIST_FNAME(type, _pushraw)(U_LIST(type) *list, type data)				\
+	UNUSED static inline U_LIST(type) *										\
+	U_LIST_FNAME(type, _pushraw)(U_LIST(type) **list, type data)			\
 	{																		\
-		U_LIST(type)	new = U_LIST_FNAME(type, _new)(data);				\
+		U_LIST(type)	*new = U_LIST_FNAME(type, _new)(data);				\
 																			\
 		return (U_LIST_FNAME(type, _push)(list, new));						\
 	}
 
 # define	U_LIST_DECL_POP(type)											\
 																			\
-	UNUSED static inline U_LIST(type)										\
-	U_LIST_FNAME(type, _pop)(U_LIST(type) *list)							\
+	UNUSED static inline U_LIST(type) *										\
+	U_LIST_FNAME(type, _pop)(U_LIST(type) **list)							\
 	{																		\
-		U_LIST(type)	pop = *list;										\
+		U_LIST(type)	*pop = *list;										\
 																			\
 		if (pop)															\
 			*list = pop->next;												\
@@ -106,9 +106,9 @@ typedef struct U_LIST_S(type)												\
 # define	U_LIST_DECL_POP_RAW(type)										\
 																			\
 	UNUSED static inline type												\
-	U_LIST_FNAME(type, _popdata)(U_LIST(type) *list)						\
+	U_LIST_FNAME(type, _popdata)(U_LIST(type) **list)						\
 	{																		\
-		U_LIST(type)	pop = U_LIST_FNAME(type, _pop)(list);				\
+		U_LIST(type)	*pop = U_LIST_FNAME(type, _pop)(list);				\
 		type			pdata = {0};										\
 																			\
 		if (pop)															\

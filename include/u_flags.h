@@ -37,9 +37,15 @@ enum _u_flag_type
 
 typedef unsigned long long	u_flags;
 
+# define	INLINE								static inline
+
 # define	U_FLAGS_FAIL						-1u
 
 # define	U_FLAG_CHK(mask, flag)				(mask & (1 << flag))
+
+# define	U_FLAGS_FOREACH(it, arr)										\
+																			\
+	for (it = arr[1]; it; ++arr, it = arr[1])								\
 
 # define	U_SHIFT(ac, av)						(ac--, *av++)
 
@@ -72,7 +78,9 @@ typedef unsigned long long	u_flags;
 
 # define	U_FLAGS_GEN(scope, list, desc)									\
 																			\
-u_flag_ctx	_uflags_ctx	= {0};												\
+UNUSED u_flag_ctx	_uflags_ctx	= {0};										\
+UNUSED u_flags		U_CONCAT(scope, _flags) = 0;							\
+UNUSED const char	*U_CONCAT(scope, _exe) = NULL;							\
 																			\
 enum U_CONCAT(scope, _bitflags)												\
 {																			\
@@ -89,7 +97,7 @@ static const u_flag	U_CONCAT(scope, _flaglist)[U_CONCAT(scope, _LAST)] =	\
 	list(U_FLAGS_STRUCT_GEN)												\
 };																			\
 																			\
-void	U_CONCAT(scope, _usage)(int ret)									\
+INLINE void	U_CONCAT(scope, _usage)(int ret)								\
 {																			\
 	int	fd_out = 1 + !!ret;													\
 																			\
@@ -101,41 +109,59 @@ void	U_CONCAT(scope, _usage)(int ret)									\
 	exit(ret);																\
 }																			\
 																			\
-u_flags	U_CONCAT(scope, _flags_parse)(int argc, char **argv)				\
+INLINE void	U_CONCAT(scope, _flags_parse)(int argc, const char **argv)		\
 {																			\
-	UNUSED const char	*exe = U_SHIFT(argc, argv);							\
+	const char			**bargv = argv;										\
 	u_flags				mask = 0;											\
+	uint32_t			last = 1;											\
 																			\
+	U_CONCAT(scope, _exe) = U_SHIFT(argc, argv);							\
 	while (argc)															\
 	{																		\
 		const char	*flag = U_SHIFT(argc, argv);							\
 																			\
 		if (*flag == '-')													\
 		{																	\
-			flag++;															\
-			if (*flag == '-')												\
+			if (flag[1] == '-')												\
 			{																\
-				flag++;														\
+				flag += 2;													\
 				list(U_FLAGS_LONGOPT_GEN)									\
 				U_FLAGS_HELP(scope, U_FLAGS_LONGOPT_GEN)					\
-				return (-1u);												\
+				u_printf("%s: unrecognized option -- '%s'\n", #scope, flag);\
+				nm_flags = -1u;												\
+				return ;													\
 			}																\
-			switch (*flag)													\
+			while (1)														\
 			{																\
-				list(U_FLAGS_CASE_GEN)										\
-				U_FLAGS_HELP(scope, U_FLAGS_CASE_GEN)						\
-				default:													\
+				flag++;														\
+				if (!*flag)													\
+					break ;													\
+				switch (*flag)												\
 				{															\
-					u_printf("%s: invalid option -- '%c'\n", #scope, *flag);\
-					return (-1u);											\
+					list(U_FLAGS_CASE_GEN)									\
+					U_FLAGS_HELP(scope, U_FLAGS_CASE_GEN)					\
+					default:												\
+					{														\
+						u_printf("%s: invalid option -- '%c'\n", #scope, *flag);\
+						nm_flags = -1u;										\
+						return ;											\
+					}														\
 				}															\
 			}																\
-			return (-1u);													\
+			continue ;														\
 		}																	\
+		if (flag != argv[last])												\
+			bargv[last++] = flag;											\
 	}																		\
 	if (mask & (1 << U_CONCAT(scope, _HELP)))								\
 		U_CONCAT(scope, _usage)(0);											\
-	return (mask);															\
+	bargv[last] = 0;														\
+	U_CONCAT(scope, _flags) = mask;											\
+}																			\
+																			\
+INLINE int U_CONCAT(scope, _flags_check)(void)								\
+{																			\
+	return (U_CONCAT(scope, _flags) == U_FLAGS_FAIL);						\
 }																			\
 
 #endif // _UFLAGS_H
