@@ -22,6 +22,11 @@
 # include <stdint.h>
 # include <stdarg.h>
 
+# define	_U_CONCAT(a, b)	a##b
+# define	U_CONCAT(a, b)	_U_CONCAT(a, b)
+
+# define	UNUSED	__attribute__((unused))
+
 /**
  *	uprintf	- writes formatted string to SDTOUT
  */
