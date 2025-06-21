@@ -1,6 +1,5 @@
 NAME		=	celf
 LIBNAME		=	lib$(NAME).so
-STATICLIB	=	lib$(NAME).a
 
 SRC_DIR		:=	src
 INC_DIR		:=	include
@@ -10,10 +9,8 @@ include			sources.mk
 SRCS		:=	$(addprefix $(SRC_DIR)/, $(SRCS))
 
 OBJS		:=	$(addprefix $(OBJ_DIR)/, $(SRCS:%.c=%.o))
-STATIC_OBJS	:=	$(addprefix $(OBJ_DIR)/static/, $(SRCS:%.c=%.o))
 
 CC			:=	clang
-AR			:=	ar
 
 CFLAGS		:=	-Wall -Wextra -Werror -MMD -MP -O0
 IFLAGS_DIRS	:=	$(INC_DIR)
@@ -44,29 +41,16 @@ MAKE		+=	--no-print-directory
 # Rules
 #
 
-all:		static shared
-
-static:		$(STATICLIB)
-
-shared:		$(LIBNAME)
+all:		$(LIBNAME)
 
 $(LIBNAME):			$(OBJS)
 	@echo " $(GREEN)$(BOLD)$(ITALIC)■$(RESET)  linking	$(GREEN)$(BOLD)$(ITALIC)$(LIBNAME)$(RESET)"
 	@$(CC) -shared $(CFLAGS) -o $@ $^ $(IFLAGS)
 
-$(STATICLIB):		$(STATIC_OBJS)
-	@echo " $(GREEN)$(BOLD)$(ITALIC)■$(RESET)  archiving	$(GREEN)$(BOLD)$(ITALIC)$(STATICLIB)$(RESET)"
-	@$(AR) -rcs $@ $^
-
 $(OBJ_DIR)/%.o:		%.c
 	@$(MKDIR) $(@D)
 	@echo " $(CYAN)$(BOLD)$(ITALIC)■$(RESET)  compiling	$(GRAY)$(BOLD)$(ITALIC)$(notdir $@)$(RESET) from $(GRAY)$(BOLD)$(ITALIC)$(notdir $^)$(RESET)"
 	@$(CC) $(CFLAGS) -fPIC -o $@ -c $< $(IFLAGS)
-
-$(OBJ_DIR)/static/%.o:	%.c
-	@$(MKDIR) $(@D)
-	@echo " $(CYAN)$(BOLD)$(ITALIC)■$(RESET)  compiling	$(GRAY)$(BOLD)$(ITALIC)$(notdir $@)$(RESET) from $(GRAY)$(BOLD)$(ITALIC)$(notdir $^)$(RESET) (static)"
-	@$(CC) $(CFLAGS) -o $@ -c $< $(IFLAGS)
 
 clean:
 	@if [ -d $(OBJ_DIR) ]; then \
@@ -79,11 +63,14 @@ fclean:		clean
 		echo " $(RED)$(BOLD)$(ITALIC)■$(RESET)  deleted	$(RED)$(BOLD)$(ITALIC)$(LIBNAME)$(RESET)"; \
 		$(RM) $(LIBNAME); \
 	fi
-	@if [ -f "$(STATICLIB)" ]; then \
-		echo " $(RED)$(BOLD)$(ITALIC)■$(RESET)  deleted	$(RED)$(BOLD)$(ITALIC)$(STATICLIB)$(RESET)"; \
-		$(RM) $(STATICLIB); \
-	fi
 	@$(RM) *.d
+
+EXAMPLE		?=
+
+example:	$(EXAMPLE) $(LIBNAME)
+	@if [ "$(EXAMPLE)" != "" ]; then \
+		$(CC) $(CFLAGS) $(IFLAGS) $^ -o $(EXAMPLE).out; \
+	fi
 
 re:			fclean all
 
