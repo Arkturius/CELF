@@ -404,7 +404,6 @@ typedef struct
 extern	CELF _celf_ctx;
 
 # include <celf_enums.h>
-
 # include <celf_context.h>
 
 CELF_API(int, ELF_open, const char *filename);
@@ -420,7 +419,7 @@ CELF_API(int, ELF_is32bit);
     type32 CONCAT(ELF32_, name) args32;										\
     type64 CONCAT(ELF64_, name) args64;										\
 																			\
-    ret CONCAT(ELF_, name) wrap_args										\
+    INLINE ret CONCAT(ELF_, name) wrap_args									\
     {																		\
         if (ELF_is32bit())													\
             return CONCAT(ELF32_, name) call32;								\
